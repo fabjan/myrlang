@@ -10,8 +10,10 @@ parse(Source) ->
         {ok, Tokens, _} ->
             case erl_parse:parse_exprs(add_dot_if_missing(Tokens)) of
                 {ok, AST} ->
-                    check_ast(AST),
-                    {ok, AST};
+                    case check_ast(AST) of
+                        ok -> {ok, AST};
+                        {error, Error} -> {error, Error}
+                    end;
                 _ ->
                     {error, {bad_expression, Tokens}}
             end;
