@@ -15,10 +15,10 @@ parse(Source) ->
                         {error, Error} -> {error, Error}
                     end;
                 _ ->
-                    {error, {bad_expression, Tokens}}
+                    {error, {parse_error, Tokens}}
             end;
         _ ->
-            {error, {bad_expression, Source}}
+            {error, {scan_error, Source}}
     end.
 
 add_dot_if_missing(Tokens) ->
@@ -42,7 +42,7 @@ check_expr(Expr) ->
             ok;
         {var, _, _} ->
             ok;
-        {op, _, _, _} ->
+        {op, _, _, _, _} ->
             ok;
         {cons, _, _, _} ->
             ok;
@@ -57,7 +57,7 @@ check_expr(Expr) ->
         {'match', _, _, _} ->
             check_match(Expr);
         _ ->
-            {error, {bad_expression, Expr}}
+            {error, {unknown_expression, Expr}}
     end.
 
 check_call({'call', _, {atom, _, _}, Exprs}) ->
