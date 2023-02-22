@@ -81,11 +81,21 @@ check_call({'call', _, Function, _}) ->
 
 check_fun({'fun', _, {clauses, [{clause, _, Params, [], Body}]}}) ->
     ParamsErrors = lists:filtermap(
-        fun (Expr) -> case check_expr(Expr) of ok -> false; Error -> {true, Error} end end,
+        fun(Expr) ->
+            case check_expr(Expr) of
+                ok -> false;
+                Error -> {true, Error}
+            end
+        end,
         Params
     ),
     BodyErrors = lists:filtermap(
-        fun (Expr) -> case check_expr(Expr) of ok -> false; Error -> {true, Error} end end,
+        fun(Expr) ->
+            case check_expr(Expr) of
+                ok -> false;
+                Error -> {true, Error}
+            end
+        end,
         Body
     ),
     case {ParamsErrors, BodyErrors} of
@@ -129,8 +139,13 @@ parse_ok_test_() ->
         "{1, 2}" => [{tuple, 1, [{integer, 1, 1}, {integer, 1, 2}]}],
         "[1]" => [{cons, 1, {integer, 1, 1}, {nil, 1}}],
         "fun() -> 1 end" => [{'fun', 1, {clauses, [{clause, 1, [], [], [{integer, 1, 1}]}]}}],
-        "fun() -> foo(1) end" => [{'fun', 1, {clauses, [{clause, 1, [], [], [{call, 1, {atom, 1, foo}, [{integer, 1, 1}]}]}]}}],
-        "fun(X) -> X end" => [{'fun', 1, {clauses, [{clause, 1, [{var, 1, 'X'}], [], [{var, 1, 'X'}]}]}}]
+        "fun() -> foo(1) end" => [
+            {'fun', 1,
+                {clauses, [{clause, 1, [], [], [{call, 1, {atom, 1, foo}, [{integer, 1, 1}]}]}]}}
+        ],
+        "fun(X) -> X end" => [
+            {'fun', 1, {clauses, [{clause, 1, [{var, 1, 'X'}], [], [{var, 1, 'X'}]}]}}
+        ]
     },
     lists:map(
         fun({Source, ExpectedAST}) ->

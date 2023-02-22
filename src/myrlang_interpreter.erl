@@ -39,7 +39,8 @@ eval(Interpreter, {op, _, OpName, LHS, RHS}) ->
     call_function(Interpreter, OpName, [LHS, RHS]);
 eval(Interpreter, {'match', _, {var, _, Name}, RHS}) ->
     bind_variable(Interpreter, Name, RHS);
-eval(_, Expr) -> {error, {illegal_expression, Expr}}.
+eval(_, Expr) ->
+    {error, {illegal_expression, Expr}}.
 
 make_list(Interpreter, Head, Tail) ->
     make_list(Interpreter, Head, Tail, []).
@@ -78,7 +79,7 @@ call_function(Interpreter, FunctionName, Params) ->
 
 eval_list(Interpreter, Elems) ->
     lists:map(
-        fun (E) ->
+        fun(E) ->
             {ok, {_, Arg}} = eval(Interpreter, E),
             Arg
         end,
