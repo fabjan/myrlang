@@ -3,22 +3,20 @@ on: push
 jobs:
   lint:
     runs-on: ubuntu-latest
+    container:
+      image: erlang:25-alpine
     name: Lint
     steps:
       - uses: actions/checkout@v3
-      - uses: erlef/setup-beam@v1
-        with:
-          otp-version: '25.2.3'
       - run: rebar3 fmt -c
   test:
-    runs-on: ubuntu-latest
-    name: OTP ${{matrix.otp}}
     strategy:
       matrix:
-        otp: ['23.3.4', '24.3.4', '25.2.3']
+        otp-version: [23, 24, 25]
+    runs-on: ubuntu-latest
+    container:
+      image: erlang:${{matrix.otp-version}}-alpine
+    name: OTP ${{matrix.otp-version}}
     steps:
       - uses: actions/checkout@v3
-      - uses: erlef/setup-beam@v1
-        with:
-          otp-version: ${{matrix.otp}}
       - run: rebar3 eunit
