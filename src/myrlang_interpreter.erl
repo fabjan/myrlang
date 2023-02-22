@@ -70,11 +70,11 @@ lookup_variable(Interpreter, Name) ->
 
 call_function(Interpreter, FunctionName, Params) ->
     case maps:find(FunctionName, Interpreter#intrepreter.primitives) of
-    {ok, Fun} ->
-        Args = eval_list(Interpreter, Params),
-        {ok, {Interpreter, erlang:apply(Fun, Args)}};
-    error ->
-        {error, {undefined_function, FunctionName}}
+        {ok, Fun} ->
+            Args = eval_list(Interpreter, Params),
+            {ok, {Interpreter, erlang:apply(Fun, Args)}};
+        error ->
+            {error, {undefined_function, FunctionName}}
     end.
 
 eval_list(Interpreter, Elems) ->
