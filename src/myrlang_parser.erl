@@ -97,7 +97,7 @@ check_fun({'fun', _, {clauses, [{clause, _, Params, [], Body}]}}) ->
             {error, {bad_fun, ParamsErrors ++ BodyErrors}}
     end;
 check_fun({'fun', _, {clauses, [Clause]}}) ->
-    {error, {bad_fun_clause, Clause}};
+    {error, {guards_not_allowed, Clause}};
 check_fun({'fun', _, {clauses, Clauses}}) ->
     {error, {too_many_clauses, Clauses}};
 check_fun(Expr) ->
