@@ -23,10 +23,12 @@ show_help() ->
     ),
     PrimitiveList = string:join(PrimitiveNames, " "),
     io:format(
-        "Available commands:~n"
-        ":help - show this help~n"
-        ":quit - quit the REPL~n"
-        "Available primitives:~n~s~n"
+        "Shell commands:~n"
+        "    :help - show this help~n"
+        "    :quit - quit the REPL~n"
+        "~n"
+        "Environment primitives:~n"
+        "    ~s~n"
         "~n",
         [PrimitiveList]
     ).
@@ -34,7 +36,7 @@ show_help() ->
 repl() ->
     repl("> ").
 repl(Prompt) ->
-    io:format("Welcome to myrlang REPL!~n"),
+    io:format("~nWelcome to Myrlang!~n~n"),
     show_help(),
     repl(Prompt, myrlang_interpreter:new(repl_primitives())).
 repl(Prompt, Interpreter0) ->
