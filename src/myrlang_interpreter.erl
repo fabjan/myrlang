@@ -38,7 +38,12 @@ eval(Interpreter, {call, _, {atom, _, FunctionName}, Args}) ->
 eval(Interpreter, {op, _, OpName, LHS, RHS}) ->
     call_function(Interpreter, OpName, [LHS, RHS]);
 eval(Interpreter, {'match', _, {var, _, Name}, RHS}) ->
-    bind_variable(Interpreter, Name, RHS);
+    case is_allowed_to_bind(RHS) of
+        true ->
+            bind_variable(Interpreter, Name, RHS);
+        false ->
+            {error, {illegal_bind, RHS}}
+    end;
 eval(_, Expr) ->
     {error, {illegal_expression, Expr}}.
 
@@ -85,3 +90,11 @@ eval_list(Interpreter, Elems) ->
         end,
         Elems
     ).
+
+is_allowed_to_bind({integer, _, _}) -> true;
+is_allowed_to_bind({atom, _, _}) -> true;
+is_allowed_to_bind({string, _, _}) -> true;
+is_allowed_to_bind({nil, _}) -> true;
+is_allowed_to_bind({cons, _, _, _}) -> true;
+is_allowed_to_bind({tuple, _, _}) -> true;
+is_allowed_to_bind(_) -> false.
