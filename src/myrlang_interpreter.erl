@@ -31,6 +31,8 @@ eval(Interpreter, {cons, _, Head, Tail}) ->
     make_list(Interpreter, Head, Tail);
 eval(Interpreter, {tuple, _, Elements}) ->
     make_tuple(Interpreter, Elements);
+eval(Interpreter, {'fun', _, {clauses, [{clause, _, Params, _, Body}]}}) ->
+    make_lambda(Interpreter, Params, Body);
 eval(Interpreter, {var, _, Name}) ->
     lookup_variable(Interpreter, Name);
 eval(Interpreter, {call, _, {atom, _, FunctionName}, Args}) ->
@@ -38,7 +40,12 @@ eval(Interpreter, {call, _, {atom, _, FunctionName}, Args}) ->
 eval(Interpreter, {op, _, OpName, LHS, RHS}) ->
     call_function(Interpreter, OpName, [LHS, RHS]);
 eval(Interpreter, {'match', _, {var, _, Name}, RHS}) ->
-    bind_variable(Interpreter, Name, RHS);
+    case is_allowed_to_bind(RHS) of
+        true ->
+            bind_variable(Interpreter, Name, RHS);
+        false ->
+            {error, {illegal_bind, RHS}}
+    end;
 eval(_, Expr) ->
     {error, {illegal_expression, Expr}}.
 
@@ -54,6 +61,45 @@ make_list(Interpreter, Head0, {cons, _, TailHead, TailTail}, Acc) ->
 make_tuple(Interpreter, Elements0) ->
     Elements = eval_list(Interpreter, Elements0),
     {ok, {Interpreter, list_to_tuple(Elements)}}.
+
+make_lambda(Interpreter0, [Param], Body) ->
+    Lambda = fun(Arg) ->
+        {ok, {Interpreter, _}} = bind_params(Interpreter0, [Param], [Arg]),
+        {ok, {_, Value}} = eval_sequence(Interpreter, Body),
+        Value
+    end,
+    {ok, {Interpreter0, Lambda}};
+make_lambda(Interpreter0, [Param0, Param1], Body) ->
+    Lambda = fun(Arg0, Arg1) ->
+        {ok, {Interpreter, _}} = bind_params(Interpreter0, [Param0, Param1], [Arg0, Arg1]),
+        {ok, {_, Value}} = eval_sequence(Interpreter, Body),
+        Value
+    end,
+    {ok, {Interpreter0, Lambda}};
+make_lambda(Interpreter0, [Param0, Param1, Param2], Body) ->
+    Lambda = fun(Arg0, Arg1, Arg2) ->
+        {ok, {Interpreter, _}} = bind_params(Interpreter0, [Param0, Param1, Param2], [
+            Arg0, Arg1, Arg2
+        ]),
+        {ok, {_, Value}} = eval_sequence(Interpreter, Body),
+        Value
+    end,
+    {ok, {Interpreter0, Lambda}}.
+
+bind_params(Interpreter, Params, Args) ->
+    lists:foldl(
+        fun
+            ({{var, _, Param}, Arg}, {ok, {InterpreterAcc, _}}) ->
+                Env = maps:put(Param, Arg, InterpreterAcc#intrepreter.env),
+                {ok, {InterpreterAcc#intrepreter{env = Env}, Arg}};
+            (_, {error, Error}) ->
+                {error, {bind_failed, Error}};
+            (Expr, _) ->
+                {error, {wont_bind, Expr}}
+        end,
+        {ok, {Interpreter, []}},
+        lists:zip(Params, Args)
+    ).
 
 bind_variable(Interpreter, Name, RHS) ->
     {ok, {_, Value}} = eval(Interpreter, RHS),
@@ -85,3 +131,15 @@ eval_list(Interpreter, Elems) ->
         end,
         Elems
     ).
+
+eval_sequence(Interpreter0, [Expr | Rest]) ->
+    Acc0 = eval(Interpreter0, Expr),
+    lists:foldl(fun(E, Acc) -> eval(Acc, E) end, Acc0, Rest).
+
+is_allowed_to_bind({integer, _, _}) -> true;
+is_allowed_to_bind({atom, _, _}) -> true;
+is_allowed_to_bind({string, _, _}) -> true;
+is_allowed_to_bind({nil, _}) -> true;
+is_allowed_to_bind({cons, _, _, _}) -> true;
+is_allowed_to_bind({tuple, _, _}) -> true;
+is_allowed_to_bind(_) -> false.
