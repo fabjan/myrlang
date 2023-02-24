@@ -13,7 +13,8 @@ repl_primitives() ->
         'div' => fun(X, Y) -> X div Y end,
         '==' => fun(X, Y) -> X == Y end,
         '<' => fun(X, Y) -> X < Y end,
-        'not' => fun(X) -> not X end
+        'not' => fun(X) -> not X end,
+        map => fun(F, List) -> lists:map(F, List) end
     }.
 
 show_help() ->
@@ -48,18 +49,58 @@ repl(Prompt, Interpreter0) ->
             show_help(),
             repl(Prompt, Interpreter0);
         Line ->
-            case myrlang_parser:parse(Line) of
-                {ok, [Expr]} ->
-                    case myrlang_interpreter:eval(Interpreter0, Expr) of
-                        {ok, {Interpreter, Value}} ->
-                            io:format("~p~n", [Value]),
-                            repl(Prompt, Interpreter);
-                        {error, Error} ->
-                            io:format("Error: ~p~n", [Error]),
-                            repl(Prompt, Interpreter0)
-                    end;
-                {error, Error} ->
+            case read_eval(Line, Interpreter0) of
+                {error, {syntax_error, Error}} ->
                     io:format("Syntax error: ~p~n", [Error]),
-                    repl(Prompt, Interpreter0)
+                    repl(Prompt, Interpreter0);
+                {error, {runtime_error, Error}} ->
+                    io:format("Runtime error: ~p~n", [Error]),
+                    repl(Prompt, Interpreter0);
+                {ok, {Interpreter1, Value}} ->
+                    io:format("~s~n", [show(Value)]),
+                    repl(Prompt, Interpreter1)
             end
     end.
+
+read_eval(Line, Interpreter0) ->
+    case myrlang_parser:parse(Line) of
+        {error, Error} ->
+            {error, {syntax_error, Error}};
+        {ok, [Expr]} ->
+            case myrlang_interpreter:eval(Interpreter0, Expr) of
+                {error, Error} ->
+                    {error, {runtime_error, Error}};
+                Result ->
+                    Result
+            end
+    end.
+
+show(Value) ->
+    %% placeholder implementation, we will hide more details later
+    io_lib:format("~p", [Value]).
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+read_eval_test_() ->
+    Interpreter = myrlang_interpreter:new(repl_primitives()),
+    Cases = #{
+        "1 + 2" => 3,
+        "1 + 2 * 3" => 7,
+        "1 + 2 * 3 == 7" => true,
+        "1 + 2 * 3 == 8" => false,
+        "1 + 2 * 3 < 8" => true,
+        "1 + 2 * 3 < 7" => false,
+        "map(fun(X) -> X + 1 end, [1, 2, 3])" => [2, 3, 4]
+    },
+    lists:map(
+        fun({Source, Expected}) ->
+            Value = read_eval(Source, Interpreter),
+            ?_assertMatch({ok, {_, Actual}}, Value),
+            {ok, {_, Actual}} = Value,
+            ?_assertEqual(Expected, Actual)
+        end,
+        maps:to_list(Cases)
+    ).
+
+-endif.
