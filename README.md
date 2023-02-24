@@ -27,8 +27,38 @@ $ rebar3 compile
 
 ## Test
 
+To run the automatic tests:
+
 ```shell
 $ rebar3 eunit
+```
+
+To build and test the example REPL shell:
+
+```shell
+$  rebar3 escriptize
+===> Verifying dependencies...
+===> Analyzing applications...
+===> Compiling myrlang
+===> Building escript for myrlang...
+
+$ _build/default/bin/myrlang
+
+Welcome to Myrlang!
+
+Shell commands:
+    :help - show this help
+    :quit - quit the REPL
+
+Environment primitives:
+    * + - < == div map not
+
+> 4711 < 42
+false
+> map(fun (X) -> X*X end, [1, 2, 3, 4, 5])
+[1,4,9,16,25]
+> :quit
+
 ```
 
 ## Usage

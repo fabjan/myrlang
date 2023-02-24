@@ -1,6 +1,7 @@
 -module(myrlang).
 
 -export([
+    main/1,
     repl/0,
     repl/1
 ]).
@@ -33,6 +34,9 @@ show_help() ->
         "~n",
         [PrimitiveList]
     ).
+
+main([]) ->
+    repl().
 
 repl() ->
     repl("> ").
