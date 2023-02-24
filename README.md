@@ -13,13 +13,11 @@ The Erlang subset is:
 - only expressions, no forms, no compiler directives
 - integers, atoms, strings
 - lists, tuples, maps, binaries
-- TODO: anonymous functions (map et al are pretty useless otherwise)
-- no sequences (no comma)
-- no match expressions (per se, binding is alright)
-- no guards
+- anonymous functions
 - function application (limited to the environment)
+- no pattern matching (but binding variables is allowed)
+- no guards
 - TBD: control flow (case? if? cond?)
-- TBD: binding of functions (this can introduce infinite loops)
 
 ## Build
 
