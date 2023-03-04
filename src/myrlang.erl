@@ -66,7 +66,12 @@ repl(Prompt, Interpreter0) ->
             io:format("Unexpected input: ~p~n", [X]),
             error;
         Line ->
-            case read_eval(Line, Interpreter0) of
+            case catch read_eval(Line, Interpreter0) of
+                {_, {Reason, [{M, F, A, _} | _]}} ->
+                    ArgStrings = lists:map(fun(X) -> io_lib:format("~p", [X]) end, A),
+                    Args = string:join(ArgStrings, ", "),
+                    io:format("Exception in ~p:~p(~s): ~p~n", [M, F, Args, Reason]),
+                    repl(Prompt, Interpreter0);
                 {error, {syntax_error, Error}} ->
                     io:format("Syntax error: ~p~n", [Error]),
                     repl(Prompt, Interpreter0);
