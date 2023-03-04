@@ -37,7 +37,12 @@ show_help() ->
     ).
 
 main([]) ->
-    repl().
+    case repl() of
+        ok ->
+            erlang:halt(0);
+        _ ->
+            erlang:halt(1, [{flush, true}])
+    end.
 
 repl() ->
     repl("> ").
@@ -48,11 +53,18 @@ repl(Prompt) ->
 repl(Prompt, Interpreter0) ->
     io:format("~s", [Prompt]),
     case io:get_line("") of
+        eof ->
+            io:format("~n"),
+            ok;
         ":quit\n" ->
+            io:format("~n"),
             ok;
         ":help\n" ->
             show_help(),
             repl(Prompt, Interpreter0);
+        X when not is_list(X) ->
+            io:format("Unexpected input: ~p~n", [X]),
+            error;
         Line ->
             case read_eval(Line, Interpreter0) of
                 {error, {syntax_error, Error}} ->
