@@ -105,8 +105,15 @@ bind_params(Interpreter, Params, Args) ->
 
 bind_variable(Interpreter, Name, RHS) ->
     {ok, {_, Value}} = eval(Interpreter, RHS),
-    Env = maps:put(Name, Value, Interpreter#intrepreter.env),
-    {ok, {Interpreter#intrepreter{env = Env}, Value}}.
+    case maps:find(Name, Interpreter#intrepreter.env) of
+        {ok, V} when V == Value ->
+            {ok, {Interpreter, Value}};
+        {ok, _} ->
+            {error, {bad_match, Value}};
+        error ->
+            Env = maps:put(Name, Value, Interpreter#intrepreter.env),
+            {ok, {Interpreter#intrepreter{env = Env}, Value}}
+    end.
 
 lookup_variable(Interpreter, Name) ->
     case maps:find(Name, Interpreter#intrepreter.env) of
