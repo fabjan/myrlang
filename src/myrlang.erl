@@ -12,6 +12,7 @@ repl_primitives() ->
         '-' => fun(X, Y) -> X - Y end,
         '*' => fun(X, Y) -> X * Y end,
         'div' => fun(X, Y) -> X div Y end,
+        'rem' => fun(X, Y) -> X rem Y end,
         '==' => fun(X, Y) -> X == Y end,
         '<' => fun(X, Y) -> X < Y end,
         'not' => fun(X) -> not X end,
