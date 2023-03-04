@@ -120,10 +120,10 @@ read_eval_test_() ->
     },
     lists:map(
         fun({Source, Expected}) ->
-            Value = read_eval(Source, Interpreter),
-            ?_assertMatch({ok, {_, Actual}}, Value),
-            {ok, {_, Actual}} = Value,
-            ?_assertEqual(Expected, Actual)
+            case read_eval(Source, Interpreter) of
+                {ok, {_, Actual}} -> ?_assertEqual(Expected, Actual);
+                _ -> throw({expected_ok, Source})
+            end
         end,
         maps:to_list(Cases)
     ).
