@@ -37,6 +37,8 @@ eval(Interpreter, {var, _, Name}) ->
     lookup_variable(Interpreter, Name);
 eval(Interpreter, {call, _, {atom, _, FunctionName}, Args}) ->
     call_function(Interpreter, FunctionName, Args);
+eval(Interpreter, {op, _, OpName, Operand}) ->
+    call_function(Interpreter, OpName, [Operand]);
 eval(Interpreter, {op, _, OpName, LHS, RHS}) ->
     call_function(Interpreter, OpName, [LHS, RHS]);
 eval(Interpreter, {'match', _, {var, _, Name}, RHS}) ->
