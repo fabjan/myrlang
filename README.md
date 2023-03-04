@@ -36,13 +36,15 @@ $ rebar3 eunit
 To build and test the example REPL shell:
 
 ```shell
-$  rebar3 escriptize
+$ make
+rebar3 escriptize
 ===> Verifying dependencies...
 ===> Analyzing applications...
 ===> Compiling myrlang
 ===> Building escript for myrlang...
+cp _build/default/bin/myrlang myrlang
 
-$ _build/default/bin/myrlang
+$ ./myrlang
 
 Welcome to Myrlang!
 
