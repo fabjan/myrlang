@@ -15,7 +15,7 @@ The Erlang subset is:
 - lists, tuples, maps, binaries
 - anonymous functions
 - function application (limited to the environment)
-- no pattern matching (but binding variables is allowed)
+- no pattern matching (but binding variables is allowed, and match checking for equality)
 - no guards
 - TBD: control flow (case? if? cond?)
 
