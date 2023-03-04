@@ -42,6 +42,8 @@ check_expr(Expr) ->
             ok;
         {var, _, _} ->
             ok;
+        {op, _, _, _} ->
+            ok;
         {op, _, _, _, _} ->
             ok;
         {cons, _, _, _} ->

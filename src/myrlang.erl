@@ -96,6 +96,9 @@ read_eval_test_() ->
         "1 + 2 * 3 == 8" => false,
         "1 + 2 * 3 < 8" => true,
         "1 + 2 * 3 < 7" => false,
+        "not not false" => false,
+        "not (1 + 2 * 3 < 7)" => true,
+        "map(fun(X) -> not (X rem 2 == 1) end, [1, 2, 3])" => [false, true, false],
         "map(fun(X) -> X + 1 end, [1, 2, 3])" => [2, 3, 4]
     },
     lists:map(
